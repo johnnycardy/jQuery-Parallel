@@ -1,0 +1,77 @@
+<html> 
+	<head> 
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
+		<script src="jquery.work.min.js"></script>
+		
+		<script>
+							
+			$(function(){
+				//This is the function that does the work in the background. Must  take two arguments, "args" and "worker".
+				var findPrimes = function (args, worker) {
+					var divisor, isPrime, result = []
+						current = args.from;
+					while(current < args.to) {
+						divisor = parseInt(current / 2, 10);
+						isPrime = true;
+						while(divisor > 1) {
+							if(current % divisor === 0) {
+							   isPrime = false;
+							   divisor = 0;
+							} else {
+								divisor -= 1;
+							}
+						}
+						if(isPrime) {
+							result.push(current);
+							
+							if(worker) {
+								//Pass an intermediate result, or a percentage complete etc, back to the UI thread
+								worker.notify(current);
+							}
+						}
+						current += 1;
+					}
+					return result;
+				}
+				
+				
+				var start = new Date().getTime();
+				var options = { 
+					debug: false, /*  Forces the code to be run in the UI thread, for easy debugging. */ 
+					awaitComplete: false /* Means the worker doesn't complete until your function calls the worker.complete function  */ 
+										 /* This is useful when you want to perform asynchronous operations in the background thread, but not allow it to complete immediately. */
+				};
+				
+				var onProgress = function(obj) {
+					//Do something when the worker reports progress
+					//console.log(obj);
+				};
+				
+				//Start the workers (forking)
+				var worker1 = $.work(findPrimes, { from: 0, to: 5000 }, options)
+							   .progress(onProgress);
+				var worker2 = $.work(findPrimes, { from: 5001, to: 10000 }, options)
+							   .progress(onProgress);
+				
+				//Wait until both workers are done before notifying completion (join)
+				$.when(worker1, worker2)
+				 .fail(function(obj){
+					//An error occurred in one of the workers
+					//console.log(obj);
+				 })
+				 .done(function(result1, result2){
+					alert("Background work complete: " + (new Date().getTime() - start) + "ms.");
+					
+					//Now run it in the UI thread for comparison
+					start = new Date().getTime();
+					findPrimes({ from: 0, to: 10000 });
+					alert("UI thread work complete: " + (new Date().getTime() - start) + "ms.");
+				});
+				
+			});
+		</script>
+	</head>
+	<body>
+
+	</body>
+</html>
