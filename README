@@ -1,0 +1,22 @@
+jQuery-Parallel plugin for jQuery >=1.5.
+Jonathan Cardy, 15 March 2010
+
+Usage:
+	function doSomeWork(args){
+		...
+	}
+
+	$.work(doSomeWork, { a:1, b:100 }).done(function(result){
+		...
+	});
+
+Note that this will only be properly useful in browsers that support HTML5 Web Workers, and even though it will fall back to the UI thread in unsupported browsers, it won't improve performance. It'll probably make it worse.
+
+In short...it's a bit of fun and a proof of concept.
+
+You can read some usage examples here:
+http://www.scottlogic.co.uk/2011/02/web-workers-part-4-wrapping-it-up/
+or in the example.html file.
+
+Since the $.work function returns a Deferred object, have a look at the Deferred API on the jQuery website:
+http://api.jquery.com/category/deferred-object/
